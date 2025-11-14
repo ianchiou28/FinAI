@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目研究进度安排</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', 'SimHei', sans-serif;
+            background-color: #f4f7f9;
+        }
+        /* Custom styling for the timeline line (hidden on mobile, visible on desktop) */
+        .timeline-line {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .timeline-line {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Timeline Container -->
+    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
+        
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-10 text-center border-b-4 border-indigo-500 pb-4">
+            项目研究进度安排
+        </h1>
+
+        <!-- Timeline Flow -->
+        <div class="flow-root">
+            <ul role="list" class="-mb-8">
+                
+                <!-- PHASE 1: 搭建交易系统 (3个月) -->
+                <li class="relative">
+                    <div class="timeline-line absolute top-0 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
+                    <div class="relative flex space-x-3 items-start md:items-center">
+                        <!-- Circle Indicator -->
+                        <div>
+                            <span class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white shadow-md text-white font-bold text-lg">
+                                1
+                            </span>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="min-w-0 flex-1 pt-1.5 md:pt-0">
+                            <div class="bg-indigo-50 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                <h3 class="text-xl font-bold text-indigo-800 mb-2">
+                                    第一阶段：系统搭建与AI完善 (3个月)
+                                </h3>
+                                <p class="text-sm font-semibold text-gray-600 mb-3">
+                                    预估用时：3个月
+                                </p>
+                                <div class="space-y-2 text-gray-700">
+                                    <h4 class="font-medium text-gray-800">主要任务 (精简):</h4>
+                                    <ul class="list-disc list-outside ml-5 space-y-1">
+                                        <li>搭建与股市平台连接的交易系统。</li>
+                                        <li>完善AI自动化交易决策和股市报告功能。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Separator (for visual flow) -->
+                <li class="h-8 md:h-12 relative">
+                    <div class="timeline-line absolute top-0 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
+                </li>
+
+                <!-- PHASE 2: 金融计量与行为数据的综合评估 (1个月) -->
+                <li class="relative">
+                    <div class="timeline-line absolute top-0 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
+                    <div class="relative flex space-x-3 items-start md:items-center">
+                        <!-- Circle Indicator -->
+                        <div>
+                            <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white shadow-md text-white font-bold text-lg">
+                                2
+                            </span>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="min-w-0 flex-1 pt-1.5 md:pt-0">
+                            <div class="bg-yellow-50 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                <h3 class="text-xl font-bold text-yellow-800 mb-2">
+                                    第二阶段：数据采集与因子提取 (1个月)
+                                </h3>
+                                <p class="text-sm font-semibold text-gray-600 mb-3">
+                                    预估用时：一个月
+                                </p>
+                                <div class="space-y-2 text-gray-700">
+                                    <h4 class="font-medium text-gray-800">主要任务 (精简):</h4>
+                                    <ul class="list-disc list-outside ml-5 space-y-1">
+                                        <li>举办比赛，吸引用户以采集行为数据。</li>
+                                        <li>从用户数据中提取正向阿尔法因子。</li>
+                                        <li>从用户数据中总结负向行为偏差因子。</li>
+                                        <li>完成决策优劣的关键驱动特征提取。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Separator (for visual flow) -->
+                <li class="h-8 md:h-12 relative">
+                    <div class="timeline-line absolute top-0 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
+                </li>
+
+                <!-- PHASE 3: 人类决策分析及其影响 (3个月) -->
+                <li class="relative">
+                    <div class="relative flex space-x-3 items-start md:items-center">
+                        <!-- Circle Indicator -->
+                        <div>
+                            <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white shadow-md text-white font-bold text-lg">
+                                3
+                            </span>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="min-w-0 flex-1 pt-1.5 md:pt-0">
+                            <div class="bg-green-50 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                <h3 class="text-xl font-bold text-green-800 mb-2">
+                                    第三阶段：决策模式解构与影响分析 (3个月)
+                                </h3>
+                                <p class="text-sm font-semibold text-gray-600 mb-3">
+                                    预估用时：3个月
+                                </p>
+                                <div class="space-y-2 text-gray-700">
+                                    <h4 class="font-medium text-gray-800">主要任务 (精简):</h4>
+                                    <ul class="list-disc list-outside ml-5 space-y-1">
+                                        <li>逆向解构人类决策背后的认知模式与特质。</li>
+                                        <li>分析决策认知逻辑，找出对模型的影响度。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+        
+    </div>
+    <!-- End of Timeline Container -->
+
+</body>
+</html>

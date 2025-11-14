@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAI 项目架构图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { text-align: center; color: #2d3748; margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: #718096; margin-bottom: 30px; font-size: 1.1em; }
+        .architecture { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 10px; }
+        .layer { background: #f7fafc; border-radius: 8px; padding: 20px; border: 2px solid #e2e8f0; }
+        .layer-title { font-size: 1.3em; font-weight: bold; color: #2d3748; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #4299e1; }
+        .module { background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #4299e1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .module:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .module-name { font-weight: 600; color: #2d3748; margin-bottom: 5px; }
+        .module-desc { font-size: 0.85em; color: #718096; }
+        .files { font-size: 0.75em; color: #a0aec0; margin-top: 5px; }
+        .frontend { border-left-color: #48bb78; }
+        .backend { border-left-color: #ed8936; }
+        .database { border-left-color: #9f7aea; }
+        .integration { border-left-color: #f56565; }
+        .flow { margin-top: 30px; padding: 20px; background: #edf2f7; border-radius: 8px; }
+        .flow-title { font-size: 1.2em; font-weight: bold; color: #2d3748; margin-bottom: 15px; }
+        .flow-diagram { display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; }
+        .flow-box { background: white; padding: 15px 25px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-weight: 600; color: #2d3748; }
+        .arrow { font-size: 2em; color: #4299e1; margin: 0 10px; }
+        .legend { display: flex; gap: 20px; justify-content: center; margin-top: 20px; margin-bottom: 10px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 3px; }
+        .tech-stack { margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 8px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .tech-item { background: white; padding: 12px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tech-label { font-weight: 600; color: #4299e1; margin-bottom: 5px; }
+        .tech-value { color: #718096; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FinAI 项目架构图</h1>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #48bb78;"></div>
+                <span>前端模块</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ed8936;"></div>
+                <span>后端模块</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9f7aea;"></div>
+                <span>数据模块</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f56565;"></div>
+                <span>外部集成</span>
+            </div>
+        </div>
+
+        <div class="architecture">
+            <!-- Frontend Layer -->
+            <div class="layer">
+                <div class="layer-title">前端层 (Frontend)</div>
+                
+                <div class="module frontend">
+                    <div class="module-name">交易面板</div>
+                    <div class="module-desc">订单创建、交易按钮、交易表单</div>
+                    <div class="files">TradingPanel, OrderForm, TradeButtons</div>
+                </div>
+
+                <div class="module frontend">
+                    <div class="module-name">投资组合</div>
+                    <div class="module-desc">账户数据、持仓管理、资产曲线</div>
+                    <div class="files">Portfolio, AccountDataView, AssetCurve</div>
+                </div>
+
+                <div class="module frontend">
+                    <div class="module-name">市场数据</div>
+                    <div class="module-desc">股票查看器、加密货币选择器</div>
+                    <div class="files">StockViewer, CryptoSelector</div>
+                </div>
+
+                <div class="module frontend">
+                    <div class="module-name">布局组件</div>
+                    <div class="module-desc">头部、侧边栏、账户选择、设置</div>
+                    <div class="files">Header, Sidebar, AccountSelector</div>
+                </div>
+
+                <div class="module frontend">
+                    <div class="module-name">UI 组件库</div>
+                    <div class="module-desc">按钮、卡片、对话框、表格等</div>
+                    <div class="files">button, card, dialog, table, tabs</div>
+                </div>
+            </div>
+
+            <!-- Backend Layer -->
+            <div class="layer">
+                <div class="layer-title">后端层 (Backend)</div>
+                
+                <div class="module backend">
+                    <div class="module-name">API 路由</div>
+                    <div class="module-desc">市场数据、订单、账户、用户管理</div>
+                    <div class="files">market_data_routes, order_routes, account_routes</div>
+                </div>
+
+                <div class="module backend">
+                    <div class="module-name">AI 决策服务</div>
+                    <div class="module-desc">智能交易决策、自动交易</div>
+                    <div class="files">ai_decision_service, auto_trader</div>
+                </div>
+
+                <div class="module backend">
+                    <div class="module-name">市场数据服务</div>
+                    <div class="module-desc">IBKR、Futu、同花顺数据接入</div>
+                    <div class="files">ibkr_market_data, futu_market_data, ths_market_data</div>
+                </div>
+
+                <div class="module backend">
+                    <div class="module-name">订单执行</div>
+                    <div class="module-desc">订单创建、监控、调度、匹配</div>
+                    <div class="files">order_executor, order_monitor, order_scheduler</div>
+                </div>
+
+                <div class="module backend">
+                    <div class="module-name">因子分析</div>
+                    <div class="module-desc">动量因子、支撑位分析</div>
+                    <div class="files">momentum, support</div>
+                </div>
+
+                <div class="module backend">
+                    <div class="module-name">资产计算</div>
+                    <div class="module-desc">资产计算器、资产曲线生成</div>
+                    <div class="files">asset_calculator, asset_curve_calculator</div>
+                </div>
+            </div>
+
+            <!-- Data Layer -->
+            <div class="layer">
+                <div class="layer-title">数据层 (Data)</div>
+                
+                <div class="module database">
+                    <div class="module-name">数据库模型</div>
+                    <div class="module-desc">用户、账户、订单、持仓模型</div>
+                    <div class="files">models.py, connection.py</div>
+                </div>
+
+                <div class="module database">
+                    <div class="module-name">数据仓库</div>
+                    <div class="module-desc">账户、订单、持仓、K线数据访问</div>
+                    <div class="files">account_repo, order_repo, position_repo, kline_repo</div>
+                </div>
+
+                <div class="module database">
+                    <div class="module-name">数据模式</div>
+                    <div class="module-desc">请求/响应数据结构定义</div>
+                    <div class="files">account, order, position, user schemas</div>
+                </div>
+
+                <div class="module integration">
+                    <div class="module-name">股市 API 集成</div>
+                    <div class="module-desc">IBKR TWS/Gateway | Futu OpenD | THS API | Hyperliquid</div>
+                    <div class="files">ibkr_market_data, futu_market_data, ths_market_data, hyperliquid_market_data</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow -->
+        <div class="flow">
+            <div class="flow-title">数据流向</div>
+            <div class="flow-diagram">
+                <div class="flow-box">用户界面<br>(React)</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">API 路由<br>(FastAPI)</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">业务服务<br>(Services)</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">数据仓库<br>(Repositories)</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">数据库<br>(SQLite)</div>
+            </div>
+            <div class="flow-diagram" style="margin-top: 20px;">
+                <div class="flow-box">外部 API<br>(IBKR/Futu/THS)</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">市场数据服务</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">订单执行器</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">AI 决策引擎</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">自动交易</div>
+            </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="tech-stack">
+            <div class="flow-title">技术栈</div>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-label">前端框架</div>
+                    <div class="tech-value">React + TypeScript + Vite</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">UI 库</div>
+                    <div class="tech-value">Tailwind CSS + shadcn/ui</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">后端框架</div>
+                    <div class="tech-value">FastAPI + Python 3.10+</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">数据库</div>
+                    <div class="tech-value">SQLite + SQLAlchemy</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">交易接口</div>
+                    <div class="tech-value">IBKR API + Futu OpenAPI</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">部署</div>
+                    <div class="tech-value">Docker + Docker Compose</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
