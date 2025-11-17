@@ -7,9 +7,7 @@ from datetime import datetime, time
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from database.models import Account, Position, Order, Trade
-from services.mt5_market_data import get_last_price, get_kline_data
-from services.mt5_order_executor import place_and_execute_mt5_order
-import MetaTrader5 as mt5
+import akshare as ak
 
 logger = logging.getLogger(__name__)
 
@@ -164,31 +162,47 @@ def get_current_simulator() -> JQSimulator:
     """获取当前模拟器"""
     return _current_simulator
 
+def get_last_price(symbol: str) -> Optional[float]:
+    """获取最新价格"""
+    try:
+        df = ak.stock_zh_a_spot_em()
+        row = df[df['代码'] == symbol]
+        if not row.empty:
+            return float(row.iloc[0]['最新价'])
+    except:
+        pass
+    return None
+
 def attribute_history(security: str, count: int, unit: str, fields: List[str]) -> Dict:
     """获取历史数据"""
-    timeframe_map = {
-        "1m": mt5.TIMEFRAME_M1,
-        "5m": mt5.TIMEFRAME_M5,
-        "1d": mt5.TIMEFRAME_D1
-    }
-    timeframe = timeframe_map.get(unit, mt5.TIMEFRAME_D1)
-    
-    klines = get_kline_data(security, timeframe, count)
-    
-    result = {}
-    for field in fields:
-        if field == "close":
-            result["close"] = [k["close"] for k in klines]
-        elif field == "open":
-            result["open"] = [k["open"] for k in klines]
-        elif field == "high":
-            result["high"] = [k["high"] for k in klines]
-        elif field == "low":
-            result["low"] = [k["low"] for k in klines]
-        elif field == "volume":
-            result["volume"] = [k["volume"] for k in klines]
-    
-    return result
+    try:
+        period_map = {"1m": "1", "5m": "5", "1d": "daily"}
+        period = period_map.get(unit, "daily")
+        
+        if period == "daily":
+            df = ak.stock_zh_a_hist(symbol=security, period="daily", adjust="qfq")
+        else:
+            df = ak.stock_zh_a_hist_min_em(symbol=security, period=period, adjust="qfq")
+        
+        df = df.tail(count)
+        result = {}
+        
+        for field in fields:
+            if field == "close" and '收盘' in df.columns:
+                result["close"] = df['收盘'].tolist()
+            elif field == "open" and '开盘' in df.columns:
+                result["open"] = df['开盘'].tolist()
+            elif field == "high" and '最高' in df.columns:
+                result["high"] = df['最高'].tolist()
+            elif field == "low" and '最低' in df.columns:
+                result["low"] = df['最低'].tolist()
+            elif field == "volume" and '成交量' in df.columns:
+                result["volume"] = df['成交量'].tolist()
+        
+        return result
+    except Exception as e:
+        logger.error(f"获取历史数据失败: {e}")
+        return {}
 
 def order(security: str, amount: int) -> Optional[Order]:
     """按股数下单"""
@@ -207,7 +221,8 @@ def order(security: str, amount: int) -> Optional[Order]:
     price = get_last_price(security)
     
     try:
-        order_obj = place_and_execute_mt5_order(
+        from services.order_executor_astock import place_and_execute_astock_order
+        order_obj = place_and_execute_astock_order(
             db=simulator.db,
             account=simulator.account,
             symbol=security,
@@ -215,8 +230,7 @@ def order(security: str, amount: int) -> Optional[Order]:
             side=side,
             order_type="MARKET",
             price=price or 0.0,
-            quantity=quantity,
-            use_mt5_platform=False
+            quantity=quantity
         )
         simulator.context.portfolio._update()
         return order_obj

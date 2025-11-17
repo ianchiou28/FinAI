@@ -8,9 +8,7 @@ from datetime import datetime, date
 from pydantic import BaseModel
 from database.connection import get_db
 from database.models import Account, Position, Order, Trade
-from services.mt5_market_data import get_last_price, get_kline_data
-from services.mt5_order_executor import place_and_execute_mt5_order
-import MetaTrader5 as mt5
+import akshare as ak
 
 router = APIRouter(prefix="/api/jq", tags=["JoinQuant Adapter"])
 
@@ -37,22 +35,29 @@ async def get_price(req: GetPriceRequest):
     try:
         securities = [req.security] if isinstance(req.security, str) else req.security
         
-        # 转换时间周期
-        timeframe = mt5.TIMEFRAME_D1 if req.frequency == "daily" else mt5.TIMEFRAME_M1
+        result = {}
         count = req.count or 100
         
-        result = {}
         for symbol in securities:
-            klines = get_kline_data(symbol, timeframe, count)
-            if klines:
-                result[symbol] = {
-                    "open": [k["open"] for k in klines],
-                    "high": [k["high"] for k in klines],
-                    "low": [k["low"] for k in klines],
-                    "close": [k["close"] for k in klines],
-                    "volume": [k["volume"] for k in klines],
-                    "datetime": [k["datetime"] for k in klines]
-                }
+            try:
+                if req.frequency == "daily":
+                    df = ak.stock_zh_a_hist(symbol=symbol, period="daily", adjust="qfq")
+                else:
+                    df = ak.stock_zh_a_hist_min_em(symbol=symbol, period="1", adjust="qfq")
+                
+                df = df.tail(count)
+                klines = df.to_dict('records')
+                if not df.empty:
+                    result[symbol] = {
+                        "open": df['开盘'].tolist(),
+                        "high": df['最高'].tolist(),
+                        "low": df['最低'].tolist(),
+                        "close": df['收盘'].tolist(),
+                        "volume": df['成交量'].tolist(),
+                        "datetime": df['日期'].astype(str).tolist()
+                    }
+            except:
+                pass
         
         return {"success": True, "data": result}
     except Exception as e:
@@ -67,30 +72,30 @@ async def attribute_history(
 ):
     """获取单个标的历史数据 - 兼容聚宽attribute_history"""
     try:
-        # 转换时间单位
-        timeframe_map = {
-            "1m": mt5.TIMEFRAME_M1,
-            "5m": mt5.TIMEFRAME_M5,
-            "1d": mt5.TIMEFRAME_D1
-        }
-        timeframe = timeframe_map.get(unit, mt5.TIMEFRAME_D1)
+        period_map = {"1m": "1", "5m": "5", "1d": "daily"}
+        period = period_map.get(unit, "daily")
         
-        klines = get_kline_data(security, timeframe, count)
+        if period == "daily":
+            df = ak.stock_zh_a_hist(symbol=security, period="daily", adjust="qfq")
+        else:
+            df = ak.stock_zh_a_hist_min_em(symbol=security, period=period, adjust="qfq")
+        
+        df = df.tail(count)
         
         field_list = fields.split(",")
         result = {}
         
         for field in field_list:
-            if field == "close":
-                result["close"] = [k["close"] for k in klines]
-            elif field == "open":
-                result["open"] = [k["open"] for k in klines]
-            elif field == "high":
-                result["high"] = [k["high"] for k in klines]
-            elif field == "low":
-                result["low"] = [k["low"] for k in klines]
-            elif field == "volume":
-                result["volume"] = [k["volume"] for k in klines]
+            if field == "close" and '收盘' in df.columns:
+                result["close"] = df['收盘'].tolist()
+            elif field == "open" and '开盘' in df.columns:
+                result["open"] = df['开盘'].tolist()
+            elif field == "high" and '最高' in df.columns:
+                result["high"] = df['最高'].tolist()
+            elif field == "low" and '最低' in df.columns:
+                result["low"] = df['最低'].tolist()
+            elif field == "volume" and '成交量' in df.columns:
+                result["volume"] = df['成交量'].tolist()
         
         return {"success": True, "data": result}
     except Exception as e:
@@ -100,7 +105,11 @@ async def attribute_history(
 async def get_current_price(security: str):
     """获取当前价格"""
     try:
-        price = get_last_price(security)
+        df = ak.stock_zh_a_spot_em()
+        row = df[df['代码'] == security]
+        if row.empty:
+            raise HTTPException(status_code=404, detail=f"未找到{security}")
+        price = float(row.iloc[0]['最新价'])
         if price is None:
             raise HTTPException(status_code=404, detail=f"未找到{security}")
         return {"success": True, "data": {"price": price}}
@@ -126,7 +135,12 @@ async def get_portfolio(db: Session = Depends(get_db)):
         
         positions_data = {}
         for pos in positions:
-            current_price = get_last_price(pos.symbol) or float(pos.avg_cost)
+            try:
+                df = ak.stock_zh_a_spot_em()
+                row = df[df['代码'] == pos.symbol]
+                current_price = float(row.iloc[0]['最新价']) if not row.empty else float(pos.avg_cost)
+            except:
+                current_price = float(pos.avg_cost)
             market_value = float(pos.quantity) * current_price
             positions_value += market_value
             
@@ -167,7 +181,12 @@ async def get_positions(db: Session = Depends(get_db)):
         
         result = []
         for pos in positions:
-            current_price = get_last_price(pos.symbol) or float(pos.avg_cost)
+            try:
+                df = ak.stock_zh_a_spot_em()
+                row = df[df['代码'] == pos.symbol]
+                current_price = float(row.iloc[0]['最新价']) if not row.empty else float(pos.avg_cost)
+            except:
+                current_price = float(pos.avg_cost)
             result.append({
                 "security": pos.symbol,
                 "total_amount": float(pos.quantity),
@@ -202,9 +221,15 @@ async def order(req: OrderRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail="数量必须是100的倍数")
         
         # 获取价格
-        price = req.price if req.style == "LimitOrder" else get_last_price(req.security)
+        if req.style == "LimitOrder":
+            price = req.price
+        else:
+            df = ak.stock_zh_a_spot_em()
+            row = df[df['代码'] == req.security]
+            price = float(row.iloc[0]['最新价']) if not row.empty else 0.0
         
-        order = place_and_execute_mt5_order(
+        from services.order_executor_astock import place_and_execute_astock_order
+        order = place_and_execute_astock_order(
             db=db,
             account=account,
             symbol=req.security,
@@ -212,8 +237,7 @@ async def order(req: OrderRequest, db: Session = Depends(get_db)):
             side=side,
             order_type="LIMIT" if req.style == "LimitOrder" else "MARKET",
             price=price or 0.0,
-            quantity=quantity,
-            use_mt5_platform=False
+            quantity=quantity
         )
         
         return {
@@ -263,9 +287,12 @@ async def order_target(
         if quantity == 0:
             return {"success": True, "message": "调整量不足100股"}
         
-        price = get_last_price(security)
+        df = ak.stock_zh_a_spot_em()
+        row = df[df['代码'] == security]
+        price = float(row.iloc[0]['最新价']) if not row.empty else 0.0
         
-        order = place_and_execute_mt5_order(
+        from services.order_executor_astock import place_and_execute_astock_order
+        order = place_and_execute_astock_order(
             db=db,
             account=account,
             symbol=security,
@@ -273,8 +300,7 @@ async def order_target(
             side=side,
             order_type="MARKET",
             price=price or 0.0,
-            quantity=quantity,
-            use_mt5_platform=False
+            quantity=quantity
         )
         
         return {
@@ -299,9 +325,12 @@ async def order_value(
         if not account:
             raise HTTPException(status_code=404, detail="未找到账户")
         
-        price = get_last_price(security)
-        if not price:
+        df = ak.stock_zh_a_spot_em()
+        row = df[df['代码'] == security]
+        if row.empty:
             raise HTTPException(status_code=404, detail=f"无法获取{security}价格")
+        
+        price = float(row.iloc[0]['最新价'])
         
         # 计算数量
         quantity = int(value / price / 100) * 100
@@ -309,7 +338,8 @@ async def order_value(
         if quantity == 0:
             raise HTTPException(status_code=400, detail="金额不足购买100股")
         
-        order = place_and_execute_mt5_order(
+        from services.order_executor_astock import place_and_execute_astock_order
+        order = place_and_execute_astock_order(
             db=db,
             account=account,
             symbol=security,
@@ -317,8 +347,7 @@ async def order_value(
             side="BUY",
             order_type="MARKET",
             price=price,
-            quantity=quantity,
-            use_mt5_platform=False
+            quantity=quantity
         )
         
         return {
