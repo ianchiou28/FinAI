@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # 导入路由
 from api.mt5_routes import router as mt5_router
 from api.mt5_ai_routes import router as mt5_ai_router
+from api.jq_adapter_routes import router as jq_router
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -32,6 +33,7 @@ app.add_middleware(
 # 注册路由
 app.include_router(mt5_router)
 app.include_router(mt5_ai_router)
+app.include_router(jq_router)
 
 @app.get("/")
 async def root():
